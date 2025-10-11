@@ -1,0 +1,326 @@
+/* ========================================================================= */
+/* --- 1. RESET E LAYOUT BÁSICO (Centralização e Estilo Global) --- */
+/* ========================================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Garante que o corpo e o HTML ocupem a altura total da tela */
+html, body {
+    height: 100%;
+    background-color: #121212; /* Fundo muito escuro */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0; /* Texto principal claro */
+}
+
+/* O container principal do React (#root) */
+#root {
+    height: 100%;
+    width: 100%;
+    /* A MÁGICA DA CENTRALIZAÇÃO (Para a tela de Login) */
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;    /* Centraliza verticalmente */
+}
+
+
+/* ========================================================================= */
+/* --- 2. ESTILOS DE LOGIN (Sophistication) --- */
+/* ========================================================================= */
+
+.login-container {
+    background-color: #1e1e1e;
+    padding: 50px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-container h2 {
+    color: #9c27b0; 
+    font-size: 2.2em;
+    font-weight: 300;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 15px;
+}
+
+.login-input {
+    padding: 14px 10px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #2c2c2c; 
+    color: #e0e0e0;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+
+.login-input:focus {
+    border-color: #9c27b0; 
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.5); 
+}
+
+.login-button {
+    padding: 14px;
+    background-color: #9c27b0; 
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #7b1fa2; 
+}
+
+.erro {
+    color: #ff5252;
+    font-size: 14px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* ========================================================================= */
+/* --- 3. ESTILOS DO CABEÇALHO E LOGO --- */
+/* ========================================================================= */
+
+.app-header {
+    /* Posicionamento Fixo no Topo */
+    position: fixed; /* MUDANÇA: Usei fixed para garantir que ele não suma ao rolar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    padding: 15px 40px;
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    z-index: 10; 
+}
+
+.header-title {
+    color: #9c27b0; 
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.logout-button {
+    padding: 8px 15px;
+    background-color: transparent;
+    color: #ff5252; 
+    border: 1px solid #ff5252;
+    border-radius: 6px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #ff5252;
+    color: #1e1e1e;
+    border-color: #ff5252;
+}
+
+.app-logo-footer {
+    position: fixed; 
+    bottom: 20px;
+    left: 20px;
+    width: 60px;
+    height: auto;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.app-logo-footer:hover {
+    opacity: 1;
+}
+
+
+/* ========================================================================= */
+/* --- 4. ESTILOS DO FORMULÁRIO DE AJUSTE (Formulario.jsx) --- */
+/* ========================================================================= */
+
+.formulario-container {
+    background-color: #1e1e1e; 
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 800px; 
+    /* Margem no topo para dar espaço ao header fixo */
+    margin-top: 80px; 
+    margin-bottom: 20px; /* Garante espaço na parte de baixo */
+    color: #e0e0e0;
+}
+
+.formulario-container h2 {
+    color: #9c27b0; 
+    font-size: 1.8em;
+    font-weight: 400;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.responsavel-info {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    color: #a0a0a0;
+}
+
+.responsavel-info span {
+    font-weight: bold;
+    color: #bb86fc;
+}
+
+.ajuste-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px; 
+}
+
+.form-group {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #a0a0a0;
+}
+
+.form-input {
+    padding: 12px 10px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: #9c27b0;
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.5);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23e0e0e0" d="M10 3L6 7L2 3z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px; 
+}
+
+.submit-button {
+    padding: 15px;
+    background-color: #9c27b0;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: #7b1fa2;
+}
+
+.submit-button:disabled {
+    background-color: #5a5a5a;
+    cursor: not-allowed;
+}
+
+.mensagem-sucesso {
+    background-color: #4caf5040;
+    color: #4caf50;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.mensagem-erro {
+    background-color: #f4433640;
+    color: #f44336;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+
+/* ========================================================================= */
+/* --- 5. MEDIA QUERY (Responsividade para Mobile) --- */
+/* ========================================================================= */
+
+@media (max-width: 768px) {
+    
+    /* Layouts */
+    .formulario-container {
+        padding: 20px; 
+        max-width: 95%; 
+        margin-top: 65px; 
+    }
+    .app-header {
+        padding: 10px 15px;
+    }
+    
+    /* Empilhamento do Formulário */
+    .form-row {
+        flex-direction: column; /* FORÇA EMPILHAMENTO VERTICAL */
+        gap: 15px; 
+    }
+    
+    /* Fontes */
+    .formulario-container h2 {
+        font-size: 1.4em; 
+    }
+    .header-title {
+        font-size: 1.1em;
+    }
+
+    /* Logo */
+    .app-logo-footer {
+        width: 45px;
+        bottom: 10px;
+        left: 10px;
+    }
+    
+    /* Botões */
+    .submit-button {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
