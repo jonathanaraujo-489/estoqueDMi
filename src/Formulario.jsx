@@ -7,18 +7,19 @@ export default function Formulario({ usuario }) {
     const [quantidade, setQuantidade] = useState('');
     const [preco, setPreco] = useState('');
     const [observacao, setObservacao] = useState('');
-    const [mensagem, setMensagem] = useState('');
+    const [mensagem, setMensagem] = useState({}); // Usamos um objeto para mensagem e tipo
     const [carregando, setCarregando] = useState(false);
 
     // O responsável será o e-mail ou ID do usuário logado
     const responsavel = usuario.email || usuario.id; 
 
-    // O seu Webhook do n8n está no .env: VITE_N8N_WEBHOOK
-    const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK;
+    // CORREÇÃO AQUI: Usamos o atalho definido no vite.config.js para contornar o CORS
+    const N8N_WEBHOOK_URL = '/api-n8n'; 
+    // NOTA: A URL completa está configurada no proxy do vite.config.js
 
     const handleAjusteEstoque = async (e) => {
         e.preventDefault();
-        setMensagem('');
+        setMensagem({});
         setCarregando(true);
 
         // 1. Validação simples
@@ -34,14 +35,14 @@ export default function Formulario({ usuario }) {
             tipo_lancamento: tipoMovimentacao,
             deposito,
             responsavel,
-            quantidade: parseFloat(quantidade), // Garante que seja um número
-            preco_lancamento: parseFloat(preco) || 0, // Garante que seja um número (ou 0 se vazio)
+            quantidade: parseFloat(quantidade), 
+            preco_lancamento: parseFloat(preco) || 0,
             observacao,
             timestamp: new Date().toISOString(),
         };
 
         try {
-            // 3. Envia para o Webhook do n8n
+            // 3. Envia para o Webhook do n8n (via Proxy do Vite)
             const response = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
@@ -49,7 +50,8 @@ export default function Formulario({ usuario }) {
                 },
                 body: JSON.stringify(payload),
             });
-
+            
+            // O n8n geralmente retorna status 200/204 (OK)
             if (response.ok) {
                 setMensagem({ tipo: 'sucesso', texto: 'Ajuste de estoque enviado com sucesso ao n8n!' });
                 // Limpa o formulário
@@ -58,9 +60,10 @@ export default function Formulario({ usuario }) {
                 setPreco('');
                 setObservacao('');
             } else {
-                setMensagem({ tipo: 'erro', texto: `Erro ao enviar. Código: ${response.status}` });
+                setMensagem({ tipo: 'erro', texto: `Erro ao enviar. Código: ${response.status}. Verifique o n8n.` });
             }
         } catch (error) {
+            // Este catch só pega a falha de conexão local (ERR_FAILED), mas não o CORS (que o proxy evita)
             setMensagem({ tipo: 'erro', texto: `Falha na conexão: ${error.message}` });
         } finally {
             setCarregando(false);
@@ -163,7 +166,7 @@ export default function Formulario({ usuario }) {
 
 
                 <button type="submit" className="submit-button" disabled={carregando}>
-                    {carregando ? 'Enviando...' : 'Enviar Ajuste para n8n'}
+                    {carregando ? 'Enviando...' : 'Lançar Estoque'}
                 </button>
 
                 {mensagem.texto && (
