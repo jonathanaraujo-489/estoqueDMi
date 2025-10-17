@@ -7,14 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "serve -s dist -p ${PORT:-5173}"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",
     "estoque-app": "github:jonathanaraujo-489/estoqueDmi",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "serve": "^14.2.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

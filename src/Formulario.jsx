@@ -14,7 +14,7 @@ export default function Formulario({ usuario }) {
     const responsavel = usuario.email || usuario.id; 
 
     // CORREÇÃO AQUI: Usamos o atalho definido no vite.config.js para contornar o CORS
-    const N8N_WEBHOOK_URL = '/api-n8n'; 
+    const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK;
     // NOTA: A URL completa está configurada no proxy do vite.config.js
 
     const handleAjusteEstoque = async (e) => {
