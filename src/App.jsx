@@ -38,7 +38,7 @@ export default function App() {
               Sair
             </button>
           </header>
-          <Formulario usuario={usuario} />
+          <Formulario usuario={usuario} onSair={handleLogout} />
         </>
       )}
 

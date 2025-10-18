@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 // O objeto 'usuario' vem do App.jsx após o login
-export default function Formulario({ usuario }) {
+export default function Formulario({ usuario, onSair }) {
     const [sku, setSku] = useState('');
-    const [tipoMovimentacao, setTipoMovimentacao] = useState('entrada'); // Select
+    const [tipoMovimentacao, setTipoMovimentacao] = useState('balanco'); // Apenas Balanço
     const [deposito, setDeposito] = useState('deposito'); // Select
     const [quantidade, setQuantidade] = useState('');
     const [preco, setPreco] = useState('');
     const [observacao, setObservacao] = useState('');
     const [mensagem, setMensagem] = useState({}); // Usamos um objeto para mensagem e tipo
     const [carregando, setCarregando] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [ultimoLancamento, setUltimoLancamento] = useState(null);
 
     // O responsável será o e-mail ou ID do usuário logado
     const responsavel = usuario.email || usuario.id; 
@@ -17,29 +19,62 @@ export default function Formulario({ usuario }) {
     const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK;
     // NOTA: A URL completa está configurada no proxy do vite.config.js
 
+    // Formata para BRL (0,00) a partir de qualquer entrada
+    const formatarBRL = (valor) => {
+        const somenteDigitos = String(valor).replace(/\D/g, '');
+        const numero = Number(somenteDigitos || 0) / 100;
+        return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const handlePrecoChange = (e) => {
+        setPreco(formatarBRL(e.target.value));
+    };
+
     const handleAjusteEstoque = async (e) => {
         e.preventDefault();
         setMensagem({});
         setCarregando(true);
 
-        // 1. Validação simples
-        if (!sku || !quantidade) {
-            setMensagem({ tipo: 'erro', texto: 'Preencha SKU e Quantidade.' });
+        // 1. Validação simples (todos obrigatórios)
+        const precoDigits = String(preco).replace(/\D/g, '');
+        const precoValido = precoDigits.length > 0 && Number(precoDigits) > 0;
+        const quantidadeValida = quantidade !== '' && !Number.isNaN(parseFloat(quantidade));
+
+        if (!sku.trim() || !deposito || !quantidadeValida || !precoValido || !observacao.trim()) {
+            setMensagem({ tipo: 'erro', texto: 'Preencha todos os campos obrigatórios.' });
             setCarregando(false);
             return;
         }
 
+        // Validação de SKU é responsabilidade do backend (n8n). O front não consulta o banco.
+
         // 2. Monta o payload para o n8n
+        // Converte o preço mascarado ("1.234,56") para número (1234.56)
+        const precoNumber = preco ? (Number(preco.replace(/\D/g, '')) / 100) : 0;
+        const agora = new Date();
+
         const payload = {
             sku,
-            tipo_lancamento: tipoMovimentacao,
+            tipo_lancamento: 'balanco',
             deposito,
             responsavel,
             quantidade: parseFloat(quantidade), 
-            preco_lancamento: parseFloat(preco) || 0,
+            preco_lancamento: precoNumber,
             observacao,
-            timestamp: new Date().toISOString(),
+            timestamp: agora.toISOString(),
         };
+
+        // Guarda os detalhes para exibir no modal
+        setUltimoLancamento({
+            sku,
+            tipo: 'balanco',
+            deposito,
+            responsavel,
+            quantidade: parseFloat(quantidade),
+            precoBRL: formatarBRL(preco),
+            observacao: observacao || '-',
+            datahora: agora.toLocaleString('pt-BR'),
+        });
 
         try {
             // 3. Envia para o Webhook do n8n (via Proxy do Vite)
@@ -53,14 +88,41 @@ export default function Formulario({ usuario }) {
             
             // O n8n geralmente retorna status 200/204 (OK)
             if (response.ok) {
-                setMensagem({ tipo: 'sucesso', texto: 'Ajuste de estoque enviado com sucesso ao n8n!' });
-                // Limpa o formulário
+                // Limpa o formulário e abre modal de sucesso
                 setSku('');
                 setQuantidade('');
                 setPreco('');
                 setObservacao('');
+                setMensagem({});
+                setShowModal(true);
             } else {
-                setMensagem({ tipo: 'erro', texto: `Erro ao enviar. Código: ${response.status}. Verifique o n8n.` });
+                // 401: erro de autenticação
+                if (response.status === 401) {
+                    setMensagem({ tipo: 'erro', texto: 'Erro de autenticação. Por favor, contate o suporte.' });
+                    return;
+                }
+                // 404 do webhook significa SKU não encontrado
+                if (response.status === 404) {
+                    setMensagem({ tipo: 'erro', texto: 'SKU não encontrado na base de produtos.' });
+                    return;
+                }
+                // Tenta extrair mensagem de erro detalhada do n8n
+                let detalhe = '';
+                try {
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const body = await response.json();
+                        detalhe = body?.message || body?.error || body?.msg || JSON.stringify(body);
+                    } else {
+                        detalhe = await response.text();
+                    }
+                } catch (_) {
+                    // ignora falha ao ler corpo
+                }
+                const texto = detalhe && detalhe.length < 400
+                    ? `Erro do n8n: ${detalhe}`
+                    : `Erro ao enviar. Código: ${response.status}. Verifique o n8n.`;
+                setMensagem({ tipo: 'erro', texto });
             }
         } catch (error) {
             // Este catch só pega a falha de conexão local (ERR_FAILED), mas não o CORS (que o proxy evita)
@@ -94,15 +156,13 @@ export default function Formulario({ usuario }) {
 
                     <div className="form-group">
                         <label htmlFor="movimentacao">Tipo de Lançamento</label>
-                        <select
+                        <input
                             id="movimentacao"
-                            value={tipoMovimentacao}
-                            onChange={(e) => setTipoMovimentacao(e.target.value)}
-                            className="form-input form-select"
-                        >
-                            <option value="entrada">Entrada (+)</option>
-                            <option value="saida">Saída (-)</option>
-                        </select>
+                            type="text"
+                            className="form-input"
+                            value="Balanço"
+                            readOnly
+                        />
                     </div>
                 </div>
 
@@ -115,6 +175,7 @@ export default function Formulario({ usuario }) {
                             value={deposito}
                             onChange={(e) => setDeposito(e.target.value)}
                             className="form-input form-select"
+                            required
                         >
                             <option value="xina">China</option>
                             <option value="deposito">Depósito Principal</option>
@@ -130,7 +191,7 @@ export default function Formulario({ usuario }) {
                             value={quantidade}
                             onChange={(e) => setQuantidade(e.target.value)}
                             className="form-input"
-                            placeholder="Ex: 10 ou -5"
+                            placeholder="Ex: 10"
                             required
                         />
                     </div>
@@ -141,18 +202,20 @@ export default function Formulario({ usuario }) {
                     <div className="form-group">
                         <label htmlFor="preco">Preço de Lançamento (R$)</label>
                         <input
-                            type="number"
+                            type="text"
                             id="preco"
                             value={preco}
-                            onChange={(e) => setPreco(e.target.value)}
+                            onChange={handlePrecoChange}
                             className="form-input"
-                            placeholder="0.00"
-                            step="0.01"
+                            placeholder="0,00"
+                            inputMode="numeric"
+                            autoComplete="off"
+                            required
                         />
                     </div>
                     
                     <div className="form-group">
-                        <label htmlFor="observacao">Observação (Opcional)</label>
+                        <label htmlFor="observacao">Observação</label>
                         <input
                             type="text"
                             id="observacao"
@@ -160,10 +223,10 @@ export default function Formulario({ usuario }) {
                             onChange={(e) => setObservacao(e.target.value)}
                             className="form-input"
                             placeholder="Motivo do ajuste ou nota"
+                            required
                         />
                     </div>
                 </div>
-
 
                 <button type="submit" className="submit-button" disabled={carregando}>
                     {carregando ? 'Enviando...' : 'Lançar Estoque'}
@@ -173,6 +236,58 @@ export default function Formulario({ usuario }) {
                     <p className={`mensagem ${mensagem.tipo === 'erro' ? 'mensagem-erro' : 'mensagem-sucesso'}`}>
                         {mensagem.texto}
                     </p>
+                )}
+
+                {showModal && (
+                    <div
+                        className="modal-overlay"
+                        style={{
+                            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                        }}
+                    >
+                        <div
+                            className="modal-content"
+                            style={{ background: '#1f1f1f', color: '#fff', padding: '24px', borderRadius: '8px', width: 'min(420px, 92%)' }}
+                        >
+                            <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Lançamento realizado com sucesso!</h3>
+                            {ultimoLancamento && (
+                                <div style={{
+                                    background: '#2a2a2a', borderRadius: '6px', padding: '12px', marginBottom: '12px', fontSize: '0.95rem'
+                                }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                                        <div><strong>SKU:</strong> {ultimoLancamento.sku}</div>
+                                        <div><strong>Tipo:</strong> Balanço</div>
+                                        <div><strong>Depósito:</strong> {ultimoLancamento.deposito}</div>
+                                        <div><strong>Quantidade:</strong> {ultimoLancamento.quantidade}</div>
+                                        <div><strong>Preço:</strong> R$ {ultimoLancamento.precoBRL}</div>
+                                        <div><strong>Responsável:</strong> {ultimoLancamento.responsavel}</div>
+                                        <div style={{ gridColumn: '1 / -1' }}><strong>Observação:</strong> {ultimoLancamento.observacao}</div>
+                                        <div style={{ gridColumn: '1 / -1' }}><strong>Data/Hora:</strong> {ultimoLancamento.datahora}</div>
+                                    </div>
+                                </div>
+                            )}
+                            <p style={{ marginTop: 0, marginBottom: '16px', opacity: 0.9 }}>
+                                Deseja fazer outro lançamento ou sair?
+                            </p>
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                                <button
+                                    type="button"
+                                    className="submit-button"
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    Novo lançamento
+                                </button>
+                                <button
+                                    type="button"
+                                    className="logout-button"
+                                    onClick={() => { setShowModal(false); onSair && onSair(); }}
+                                >
+                                    Sair
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </form>
         </div>
