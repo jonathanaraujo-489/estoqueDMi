@@ -6,12 +6,10 @@ export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
-  const [mensagem, setMensagem] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErro(""); // Limpa erros antigos
-    setMensagem("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -24,40 +22,6 @@ export default function Login({ onLogin }) {
       onLogin(data.user); // Sucesso: muda para o Formulário
     } else {
       setErro("Credenciais inválidas ou erro desconhecido.");
-    }
-  };
-
-  const handleSignup = async () => {
-    setErro("");
-    setMensagem("");
-    const emailTrim = (email || "").trim();
-    const senhaStr = String(senha || "");
-    const emailOk = /.+@.+\..+/.test(emailTrim);
-    const senhaOk = senhaStr.length >= 8;
-    if (!emailOk) {
-      setErro("Informe um e-mail válido.");
-      return;
-    }
-    if (!senhaOk) {
-      setErro("A senha deve ter pelo menos 8 caracteres.");
-      return;
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email: emailTrim,
-      password: senhaStr,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) {
-      setErro(error.message);
-      return;
-    }
-    if (data.user) {
-      setMensagem(
-        "Conta criada. Verifique seu e-mail para confirmar o cadastro antes de entrar."
-      );
     }
   };
 
@@ -85,7 +49,6 @@ export default function Login({ onLogin }) {
         <button type="submit" className="login-button">Entrar</button>
         
         {erro && <p className="erro">{erro}</p>}
-        {mensagem && <p className="mensagem-sucesso">{mensagem}</p>}
       </form>
     </div>
   );
