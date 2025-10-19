@@ -11,6 +11,9 @@
 /* Toggle do menu (mostrado em telas pequenas) */
 .sidebar-toggle {
     display: none;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #e0e0e0;
 }
 
 /* Garante que o corpo e o HTML ocupem a altura total da tela */
@@ -341,6 +344,9 @@ html, body {
 /* ========================================================================= */
 /* --- 5. MEDIA QUERY (Responsividade para Mobile) --- */
 /* ========================================================================= */
+
+.sidebar { width: 220px; }
+.content-wrap { margin-left: 236px; }
 
 @media (max-width: 640px) {
     

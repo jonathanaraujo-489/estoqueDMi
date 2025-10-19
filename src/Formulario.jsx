@@ -207,8 +207,8 @@ export default function Formulario({ usuario, onSair }) {
                 <Users />
             )}
             {(!isAdmin || adminView === 'estoque') && (
-            <div className="card" style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
-            <h2 style={{ marginTop: 0, textAlign: 'left' }}>Consulta de Produto</h2>
+            <div style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', width: 'min(1200px, calc(100% - 96px))', margin: '10vh 48px 0', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
+            <h3 style={{ marginTop: 0, textAlign: 'left' }}>Consulta de Produto</h3>
             <p className="responsavel-info" style={{ textAlign: 'left', margin: 0, marginBottom: 8 }}>Responsável: <span>{responsavelNome}</span></p>
             <form className="ajuste-form" onSubmit={(e) => e.preventDefault()}>
                 {/* Passo 1: Consulta */}
