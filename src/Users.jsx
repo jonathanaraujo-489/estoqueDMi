@@ -188,31 +188,31 @@ export default function Users() {
 
       {showCreate && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div className="modal-content" style={{ background: '#1f1f1f', color: '#fff', padding: 24, borderRadius: 8, width: 'min(520px, 92%)' }}>
+          <div className="modal-content" style={{ background: '#1f1f1f', color: '#fff', padding: 24, borderRadius: 8, width: 'min(460px, 92%)' }}>
             <h3 style={{ marginTop: 0 }}>Cadastrar usuário</h3>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
+            <div className="form-row" style={{ gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: 220 }}>
                 <label htmlFor="cNome">Nome completo</label>
                 <input id="cNome" type="text" className="form-input" value={cNome} onChange={(e) => setCNome(e.target.value)} placeholder="Ex.: Maria Silva" />
               </div>
             </div>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
+            <div className="form-row" style={{ gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: 220 }}>
                 <label htmlFor="cEmail">E-mail</label>
                 <input id="cEmail" type="email" className="form-input" value={cEmail} onChange={(e) => setCEmail(e.target.value)} placeholder="usuario@empresa.com" />
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
+              <div className="form-group" style={{ flex: 1, minWidth: 220 }}>
                 <label htmlFor="cSenha">Senha</label>
                 <input id="cSenha" type="password" className="form-input" value={cSenha} onChange={(e) => setCSenha(e.target.value)} placeholder="mínimo 8 caracteres" />
               </div>
-              <div className="form-group" style={{ flex: 0.6 }}>
+              <div className="form-group" style={{ flex: 0.5, minWidth: 160 }}>
                 <label htmlFor="cAcesso">Acesso</label>
-                <select id="cAcesso" className="form-input" value={cAcesso} onChange={(e) => setCAcesso(e.target.value)}>
+                <select id="cAcesso" className="form-input form-select" value={cAcesso} onChange={(e) => setCAcesso(e.target.value)}>
                   <option value="user">Usuário</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
+              <div className="form-group" style={{ flex: 1, minWidth: 220 }}>
                 <label htmlFor="cFoto">Foto (arquivo local)</label>
                 <input id="cFoto" type="file" accept="image/*" className="form-input" onChange={(e) => setCFoto(e.target.files?.[0] || null)} />
               </div>
@@ -220,8 +220,8 @@ export default function Users() {
             {createErr && <p className="mensagem mensagem-erro">{createErr}</p>}
             {createMsg && <p className="mensagem mensagem-sucesso">{createMsg}</p>}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 12 }}>
-              <button type="button" className="button-outline-red" onClick={() => setShowCreate(false)}>Cancelar</button>
-              <button type="button" className="submit-button" onClick={handleCreate} disabled={createLoading}>{createLoading ? 'Criando...' : 'Criar'}</button>
+              <button type="button" className="button-outline-red" style={{ marginTop: 0 }} onClick={() => setShowCreate(false)}>Cancelar</button>
+              <button type="button" className="submit-button" style={{ marginTop: 0 }} onClick={handleCreate} disabled={createLoading}>{createLoading ? 'Criando...' : 'Criar'}</button>
             </div>
           </div>
         </div>
@@ -229,31 +229,31 @@ export default function Users() {
 
       {editUser && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div className="modal-content" style={{ background: '#1f1f1f', color: '#fff', padding: 24, borderRadius: 8, width: 'min(520px, 92%)' }}>
+          <div className="modal-content" style={{ background: '#1f1f1f', color: '#fff', padding: 24, borderRadius: 8, width: 'min(460px, 92%)' }}>
             <h3 style={{ marginTop: 0 }}>Editar usuário</h3>
-            <div className="form-row">
+            <div className="form-row" style={{ gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label htmlFor="eNome">Nome completo</label>
                 <input id="eNome" type="text" className="form-input" value={eNome} onChange={(e) => setENome(e.target.value)} />
               </div>
               <div className="form-group" style={{ flex: 0.6 }}>
                 <label htmlFor="eAcesso">Acesso</label>
-                <select id="eAcesso" className="form-input" value={eAcesso} onChange={(e) => setEAcesso(e.target.value)}>
+                <select id="eAcesso" className="form-input form-select" value={eAcesso} onChange={(e) => setEAcesso(e.target.value)}>
                   <option value="user">Usuário</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
             </div>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
+            <div className="form-row" style={{ gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: 1, minWidth: 220 }}>
                 <label htmlFor="eFoto">Foto (arquivo local)</label>
                 <input id="eFoto" type="file" accept="image/*" className="form-input" onChange={(e) => setEFoto(e.target.files?.[0] || null)} />
               </div>
             </div>
             {editErr && <p className="mensagem mensagem-erro">{editErr}</p>}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 12 }}>
-              <button type="button" className="button-outline-red" onClick={() => setEditUser(null)} disabled={editLoading}>Cancelar</button>
-              <button type="button" className="submit-button" onClick={handleEdit} disabled={editLoading}>{editLoading ? 'Salvando...' : 'Salvar alterações'}</button>
+              <button type="button" className="button-outline-red" style={{ marginTop: 0 }} onClick={() => setEditUser(null)} disabled={editLoading}>Cancelar</button>
+              <button type="button" className="submit-button" style={{ marginTop: 0 }} onClick={handleEdit} disabled={editLoading}>{editLoading ? 'Salvando...' : 'Salvar alterações'}</button>
             </div>
           </div>
         </div>
