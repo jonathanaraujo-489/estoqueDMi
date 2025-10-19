@@ -8,6 +8,11 @@
     padding: 0;
 }
 
+/* Toggle do menu (mostrado em telas pequenas) */
+.sidebar-toggle {
+    display: none;
+}
+
 /* Garante que o corpo e o HTML ocupem a altura total da tela */
 html, body {
     height: 100%;
@@ -337,7 +342,7 @@ html, body {
 /* --- 5. MEDIA QUERY (Responsividade para Mobile) --- */
 /* ========================================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     
     /* Layouts */
     .formulario-container {
@@ -348,6 +353,23 @@ html, body {
     .app-header {
         padding: 10px 15px;
     }
+    /* Sidebar e conteúdo responsivos */
+    .sidebar {
+        width: 72px !important;
+        padding: 12px 8px !important;
+    }
+    .content-wrap { margin-left: 84px !important; }
+    /* Quando o menu estiver fechado, ocupar largura total */
+    .sidebar[data-open="0"] ~ .content-wrap, 
+    .content-wrap:has(+ .sidebar[data-open="0"]) { margin-left: 0 !important; }
+
+    /* Colapso/expansão por transform */
+    .sidebar { transition: transform 0.25s ease; position: fixed; z-index: 20; }
+    .sidebar[data-open="0"] { transform: translateX(-110%); pointer-events: none; }
+    .sidebar[data-open="1"] { transform: translateX(0); pointer-events: auto; }
+
+    /* Mostrar botão hambúrguer */
+    .sidebar-toggle { display: inline-flex; }
     
     /* Empilhamento do Formulário */
     .form-row {
@@ -375,4 +397,54 @@ html, body {
         font-size: 16px;
         padding: 12px;
     }
+    .button-outline-red { font-size: 16px; padding: 12px; }
+
+    /* Card ocupa quase toda a largura no mobile */
+    .card { width: calc(100% - 32px); margin: 16px; }
+
+    /* Sidebar compacta: reduz logo e botões */
+    .sidebar img[alt="Logo DMI"] { width: 64px !important; height: 64px !important; }
+    .sidebar .submit-button { font-size: 14px; padding: 10px; }
+
+    /* Backdrop do menu no mobile */
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 15;
+    }
+
+    /* Header da lista de usuários empilha e botão ocupa 100% */
+    .users-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    .users-header .submit-button { width: 100%; margin-top: 0; }
+    .users-table { width: 100%; overflow-x: auto; }
+}
+
+/* Tablet (<= 1024px) ajustes suaves */
+@media (max-width: 1024px) and (min-width: 641px) {
+    .sidebar { width: 180px !important; padding: 16px 10px !important; }
+    .content-wrap { margin-left: 196px !important; }
+    .sidebar .submit-button, .sidebar .logout-button { width: 100%; }
+    .card { width: calc(100% - 64px); margin: 8vh 32px 0; }
+}
+
+/* Mobile pequeno (<= 480px) colapsa mais */
+@media (max-width: 480px) {
+    /* Sidebar vira overlay mais largo e não desloca o conteúdo */
+    .sidebar { width: 240px !important; padding: 14px 10px !important; z-index: 20; }
+    .sidebar[data-open="0"] { transform: translateX(-110%); }
+    .sidebar[data-open="1"] { transform: translateX(0); }
+    .sidebar-toggle { display: inline-flex; }
+    .content-wrap { margin-left: 0 !important; }
+    .sidebar-toggle { position: fixed; top: 10px; left: 10px; z-index: 25; }
+    .sidebar-backdrop { z-index: 15; }
+    .sidebar .submit-button, .sidebar .logout-button { width: 100%; font-size: 15px; padding: 12px; }
+    .formulario-container, .ajuste-form, .modal-content { width: 100% !important; }
+    .mensagem, .submit-button, .button-outline-red { width: 100%; }
 }

@@ -138,7 +138,7 @@ export default function Users() {
 
   return (
     <div style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', width: 'min(1200px, calc(100% - 96px))', margin: '10vh 48px 0', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div className="users-header mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h3 style={{ margin: 0 }}>Usuários cadastrados</h3>
         <button type="button" className="submit-button" style={{ marginTop: 0 }} onClick={() => { setShowCreate(true); setCreateErr(''); setCreateMsg(''); }}>Cadastrar usuário</button>
       </div>
@@ -146,8 +146,8 @@ export default function Users() {
       {carregando ? (
         <p>Carregando...</p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+        <div className="users-table table-responsive" style={{ overflowX: 'auto' }}>
+          <table className="table table-striped table-dark" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr style={{ textAlign: 'left', borderBottom: '1px solid #444' }}>
                 <th style={{ padding: '8px' }}>Foto</th>

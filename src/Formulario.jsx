@@ -7,6 +7,14 @@ export default function Formulario({ usuario, onSair }) {
     const [showModal, setShowModal] = useState(false);
     const [ultimoLancamento, setUltimoLancamento] = useState(null);
     const [adminView, setAdminView] = useState('estoque'); // 'estoque' | 'usuarios'
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    useEffect(() => {
+        try { if (window?.innerWidth) setSidebarOpen(window.innerWidth > 640); } catch {}
+    }, []);
+
+    const handleNav = (view) => {
+        setAdminView(view);
+    };
 
     // Responsável exibido (dados da tabela users)
     const [responsavelNome, setResponsavelNome] = useState(usuario.email || usuario.id);
@@ -171,12 +179,12 @@ export default function Formulario({ usuario, onSair }) {
 
     return (
         <div style={{ ...(isAdmin ? { maxWidth: '100%', width: '100%' } : {}) }}>
-            <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: '#2a2a2a', borderRight: '1px solid #3a3a3a', padding: '16px 10px 16px 10px', zIndex: 5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <aside className="sidebar" data-open={sidebarOpen ? '1' : '0'} style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: '#2a2a2a', borderRight: '1px solid #3a3a3a', padding: '16px 10px 16px 10px', zIndex: 5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                     <img src="/simbolo-dmi.png" alt="Logo DMI" style={{ width: 96, height: 96, objectFit: 'contain', display: 'block', margin: '0 auto 12px auto' }} />
-                    <button type="button" className="submit-button" style={{ width: '100%', marginTop: 0 }} onClick={() => setAdminView('estoque')}>Controle de estoque</button>
+                    <button type="button" className="submit-button" style={{ width: '100%', marginTop: 0 }} onClick={() => handleNav('estoque')}>Controle de estoque</button>
                     {isAdmin && (
-                        <button type="button" className="submit-button" style={{ width: '100%', marginTop: 10 }} onClick={() => setAdminView('usuarios')}>Usuários</button>
+                        <button type="button" className="submit-button" style={{ width: '100%', marginTop: 10 }} onClick={() => handleNav('usuarios')}>Usuários</button>
                     )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -186,16 +194,20 @@ export default function Formulario({ usuario, onSair }) {
                         style={{ width: 86, height: 86, borderRadius: 6, objectFit: 'cover', display: 'block', margin: '0 auto 4px auto', background: '#333' }}
                         onError={(e) => { e.currentTarget.src = '/simbolo-dmi.png'; }}
                     />
-                    <button type="button" className="logout-button" style={{ width: '100%' }} onClick={onSair}>Sair</button>
+                    <button type="button" className="logout-button" style={{ width: '100%' }} onClick={() => { onSair && onSair(); }}>Sair</button>
                     <img src="/simboloEvolury.png" alt="Logo" style={{ width: 44, height: 44, objectFit: 'contain', alignSelf: 'center', opacity: 0.85 }} />
                 </div>
             </aside>
-            <div style={{ marginLeft: 236 }}>
+            {/* Backdrop removido: recolhe apenas pelo botão ☰ */}
+            <div className="content-wrap">
+            <button type="button" className="sidebar-toggle" onClick={() => setSidebarOpen(v => !v)} aria-label="Alternar menu">
+                ☰
+            </button>
             {isAdmin && adminView === 'usuarios' && (
                 <Users />
             )}
             {(!isAdmin || adminView === 'estoque') && (
-            <div style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', width: 'min(1200px, calc(100% - 96px))', margin: '10vh 48px 0', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
+            <div className="card" style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
             <h2 style={{ marginTop: 0, textAlign: 'left' }}>Consulta de Produto</h2>
             <p className="responsavel-info" style={{ textAlign: 'left', margin: 0, marginBottom: 8 }}>Responsável: <span>{responsavelNome}</span></p>
             <form className="ajuste-form" onSubmit={(e) => e.preventDefault()}>
