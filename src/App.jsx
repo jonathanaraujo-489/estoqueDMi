@@ -27,25 +27,18 @@ export default function App() {
   };
 
   return (
-    <> 
+    <>
       {!usuario ? (
-        <Login onLogin={setUsuario} />
+        <div className="login-center">
+          <Login onLogin={setUsuario} />
+        </div>
       ) : (
-        <>
-          <header className="app-header">
-            <h1 className="header-title">Controle de Estoque</h1>
-            <button onClick={handleLogout} className="logout-button">
-              Sair
-            </button>
-          </header>
-          <Formulario usuario={usuario} onSair={handleLogout} />
-        </>
+        <Formulario usuario={usuario} onSair={handleLogout} />
       )}
 
-      {/* NOVO CÓDIGO: Imagem adicionada no caminho público com classe para CSS */}
-      <img 
-        src="/simboloEvolury.png" 
-        alt="Símbolo Evolury" 
+      <img
+        src="/simboloEvolury.png"
+        alt="Símbolo Evolury"
         className="app-logo-footer"
       />
     </>

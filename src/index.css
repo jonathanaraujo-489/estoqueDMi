@@ -11,7 +11,7 @@
 /* Garante que o corpo e o HTML ocupem a altura total da tela */
 html, body {
     height: 100%;
-    background-color: #121212; /* Fundo muito escuro */
+    background-color: #1e1e1e; /* Cinza uniforme para toda a tela */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #e0e0e0; /* Texto principal claro */
 }
@@ -20,10 +20,15 @@ html, body {
 #root {
     height: 100%;
     width: 100%;
-    /* A MÁGICA DA CENTRALIZAÇÃO (Para a tela de Login) */
+    display: block; /* Evita centralização global para manter layout de app e sidebar */
+}
+
+/* Wrapper para centralizar o Login sem afetar o restante do app */
+.login-center {
+    min-height: 100vh;
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center;    /* Centraliza verticalmente */
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -141,6 +146,53 @@ html, body {
     background-color: #ff5252;
     color: #1e1e1e;
     border-color: #ff5252;
+}
+
+/* Botão secundário preenchido em vermelho, com o MESMO padrão do submit-button */
+.danger-button {
+    padding: 15px;
+    background-color: #ff5252;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.danger-button:hover:not(:disabled) {
+    background-color: #e04646;
+}
+
+.danger-button:disabled {
+    background-color: #b94a4a;
+    cursor: not-allowed;
+}
+
+/* Botão outline vermelho, MESMAS dimensões do submit-button, sem cor de fundo */
+.button-outline-red {
+    padding: 15px;
+    background-color: transparent;
+    color: #ff5252;
+    border: 1px solid #ff5252;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.button-outline-red:hover:not(:disabled) {
+    background-color: rgba(255, 82, 82, 0.08);
+    border-color: #ff6b6b;
+}
+
+.button-outline-red:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .app-logo-footer {

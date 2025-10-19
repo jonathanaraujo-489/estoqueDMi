@@ -1,21 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import supabase from './supabaseClient';
+import Users from './Users';
 // O objeto 'usuario' vem do App.jsx após o login
 export default function Formulario({ usuario, onSair }) {
     const [sku, setSku] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [ultimoLancamento, setUltimoLancamento] = useState(null);
-    const [showCadastro, setShowCadastro] = useState(false);
-    const [novoEmail, setNovoEmail] = useState('');
-    const [novaSenha, setNovaSenha] = useState('');
-    const [erroCadastro, setErroCadastro] = useState('');
-    const [msgCadastro, setMsgCadastro] = useState('');
-    const [carregandoCadastro, setCarregandoCadastro] = useState(false);
+    const [adminView, setAdminView] = useState('estoque'); // 'estoque' | 'usuarios'
 
-    // O responsável será o e-mail ou ID do usuário logado
-    const responsavel = usuario.email || usuario.id; 
+    // Responsável exibido (dados da tabela users)
+    const [responsavelNome, setResponsavelNome] = useState(usuario.email || usuario.id);
+    const [responsavelFoto, setResponsavelFoto] = useState(null);
     const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-    const isAdmin = ADMIN_EMAILS.includes(String(usuario?.email || '').toLowerCase());
+    const [isAdmin, setIsAdmin] = useState(false);
+    useEffect(() => {
+        let active = true;
+        const checkAdmin = async () => {
+            try {
+                if (!usuario?.id) {
+                    setIsAdmin(false);
+                    return;
+                }
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('acesso, name, image')
+                    .eq('id', usuario.id)
+                    .single();
+                if (!active) return;
+                if (!error && data) {
+                    if (data?.name) setResponsavelNome(data.name);
+                    setResponsavelFoto(data?.image || null);
+                }
+                if (!error && data?.acesso === 'admin') {
+                    setIsAdmin(true);
+                } else {
+                    const byEnv = ADMIN_EMAILS.includes(String(usuario?.email || '').toLowerCase());
+                    setIsAdmin(byEnv);
+                }
+            } catch (_) {
+                const byEnv = ADMIN_EMAILS.includes(String(usuario?.email || '').toLowerCase());
+                setIsAdmin(byEnv);
+                setResponsavelNome(usuario.email || usuario.id);
+                setResponsavelFoto(null);
+            }
+        };
+        checkAdmin();
+        return () => { active = false; };
+    }, [usuario?.id, usuario?.email]);
+
+    // listagem de usuários foi movida para o componente <Users />
 
     // CORREÇÃO AQUI: Usamos o atalho definido no vite.config.js para contornar o CORS
     const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK;
@@ -37,7 +70,7 @@ export default function Formulario({ usuario, onSair }) {
                     intent: 'post',
                     sku: skuInfo.sku,
                     estoque_desejado: desejado,
-                    responsavel,
+                    responsavel: responsavelNome,
                     timestamp: new Date().toISOString(),
                     produto: skuInfo,
                 }),
@@ -63,7 +96,7 @@ export default function Formulario({ usuario, onSair }) {
                 sku: skuInfo.sku,
                 tipo: 'ajuste',
                 deposito: '-',
-                responsavel,
+                responsavel: responsavelNome,
                 quantidade: '-',
                 precoBRL: '-',
                 observacao: '-',
@@ -134,81 +167,37 @@ export default function Formulario({ usuario, onSair }) {
         }
     };
 
-    const handleAdminSignup = async () => {
-        setErroCadastro('');
-        setMsgCadastro('');
-        const emailTrim = (novoEmail || '').trim();
-        const senhaStr = String(novaSenha || '');
-        const emailOk = /.+@.+\..+/.test(emailTrim);
-        const senhaOk = senhaStr.length >= 8;
-        if (!emailOk) { setErroCadastro('Informe um e-mail válido.'); return; }
-        if (!senhaOk) { setErroCadastro('A senha deve ter pelo menos 8 caracteres.'); return; }
-        setCarregandoCadastro(true);
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email: emailTrim,
-                password: senhaStr,
-                options: { emailRedirectTo: window.location.origin },
-            });
-            if (error) { setErroCadastro(error.message); return; }
-            if (data.user) {
-                setMsgCadastro('Usuário criado. Confirme o e-mail para ativar a conta.');
-                setNovoEmail('');
-                setNovaSenha('');
-            }
-        } finally {
-            setCarregandoCadastro(false);
-        }
-    };
+    // criação de acesso movida para <AdminNewAccess />
 
     return (
-        <div className="formulario-container">
-            <h2>Consulta de Produto</h2>
-            <p className="responsavel-info">Responsável: <span>{responsavel}</span></p>
-            {isAdmin && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
-                    {!showCadastro ? (
-                        <a
-                            href="#"
-                            style={{ color: '#8a5cf6', textDecoration: 'underline' }}
-                            onClick={(e) => { e.preventDefault(); setShowCadastro(true); }}
-                        >
-                            Cadastrar usuário
-                        </a>
-                    ) : (
-                        <div style={{ background: '#2a2a2a', padding: '12px', borderRadius: '6px', width: 'min(460px, 100%)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <strong>Novo usuário</strong>
-                                <button type="button" className="logout-button" onClick={() => { setShowCadastro(false); setErroCadastro(''); setMsgCadastro(''); }}>Fechar</button>
-                            </div>
-                            <div style={{ display: 'grid', gap: '8px' }}>
-                                <input
-                                    type="email"
-                                    placeholder="Email do novo usuário"
-                                    value={novoEmail}
-                                    onChange={(e) => setNovoEmail(e.target.value)}
-                                    className="form-input"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="Senha inicial"
-                                    value={novaSenha}
-                                    onChange={(e) => setNovaSenha(e.target.value)}
-                                    className="form-input"
-                                />
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                    <button type="button" className="submit-button" disabled={carregandoCadastro} onClick={handleAdminSignup}>
-                                        {carregandoCadastro ? 'Cadastrando...' : 'Cadastrar'}
-                                    </button>
-                                </div>
-                                {erroCadastro && <p className="mensagem mensagem-erro" style={{ margin: 0 }}>{erroCadastro}</p>}
-                                {msgCadastro && <p className="mensagem mensagem-sucesso" style={{ margin: 0 }}>{msgCadastro}</p>}
-                            </div>
-                        </div>
+        <div style={{ ...(isAdmin ? { maxWidth: '100%', width: '100%' } : {}) }}>
+            <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: '#2a2a2a', borderRight: '1px solid #3a3a3a', padding: '16px 10px 16px 10px', zIndex: 5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                    <img src="/simbolo-dmi.png" alt="Logo DMI" style={{ width: 96, height: 96, objectFit: 'contain', display: 'block', margin: '0 auto 12px auto' }} />
+                    <button type="button" className="submit-button" style={{ width: '100%', marginTop: 0 }} onClick={() => setAdminView('estoque')}>Controle de estoque</button>
+                    {isAdmin && (
+                        <button type="button" className="submit-button" style={{ width: '100%', marginTop: 10 }} onClick={() => setAdminView('usuarios')}>Usuários</button>
                     )}
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <img
+                        src={responsavelFoto || '/simbolo-dmi.png'}
+                        alt="Foto do responsável"
+                        style={{ width: 86, height: 86, borderRadius: 6, objectFit: 'cover', display: 'block', margin: '0 auto 4px auto', background: '#333' }}
+                        onError={(e) => { e.currentTarget.src = '/simbolo-dmi.png'; }}
+                    />
+                    <button type="button" className="logout-button" style={{ width: '100%' }} onClick={onSair}>Sair</button>
+                    <img src="/simboloEvolury.png" alt="Logo" style={{ width: 44, height: 44, objectFit: 'contain', alignSelf: 'center', opacity: 0.85 }} />
+                </div>
+            </aside>
+            <div style={{ marginLeft: 236 }}>
+            {isAdmin && adminView === 'usuarios' && (
+                <Users />
             )}
-
+            {(!isAdmin || adminView === 'estoque') && (
+            <div style={{ background: '#2a2a2a', padding: '16px', borderRadius: '8px', width: 'min(1200px, calc(100% - 96px))', margin: '10vh 48px 0', boxShadow: '0 10px 24px rgba(0,0,0,0.25)' }}>
+            <h2 style={{ marginTop: 0, textAlign: 'left' }}>Consulta de Produto</h2>
+            <p className="responsavel-info" style={{ textAlign: 'left', margin: 0, marginBottom: 8 }}>Responsável: <span>{responsavelNome}</span></p>
             <form className="ajuste-form" onSubmit={(e) => e.preventDefault()}>
                 {/* Passo 1: Consulta */}
                 <div className="form-row">
@@ -296,6 +285,9 @@ export default function Formulario({ usuario, onSair }) {
                     </div>
                 )}
             </form>
+            </div>
+            )}
+            </div>
 
             {/* Modal de ajuste de estoque */}
             {showAjusteModal && (
